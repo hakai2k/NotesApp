@@ -1,0 +1,11 @@
+.cardText{
+    white-space: pre-line;
+}
+
+.card{
+    transition: all 250ms;
+}
+
+.card:hover{
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+}
