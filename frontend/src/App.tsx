@@ -1,28 +1,40 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import { useEffect, useState } from "react";
+import style from "./styles/app.module.css";
+import Note from "./components/Note/Note";
+import * as NotesApi from "./network/Notes_API";
+import { NoteModel } from "./models/NoteModel";
+import AddNote from "./components/AddNote/AddNote";
+import { Toaster } from "./components/ui/toaster";
 
 function App() {
-  const [notes, setNotes] = useState(0)
+  const [notes, setNotes] = useState<NoteModel[]>([]);
 
-  useEffect( () => {
-    async function loadNotes () {
-      try{
-        const response = await fetch("/notes/")
-        const json = await response.json()
-        setNotes(json)
-      } catch(error){
-        console.error(error)
+  useEffect(() => {
+    async function loadNotes() {
+      try {
+        const notes = await NotesApi.fetchNotes();
+        setNotes(notes);
+      } catch (error) {
+        console.error(error);
+        alert(error);
       }
     }
-    loadNotes()
-  }, [])
+    loadNotes();
+  }, []);
 
   return (
     <>
-      <h1>Hi, Front-end!</h1>
-      <p>{JSON.stringify(notes)}</p>
+      <main className={style.main}>
+        <div className={style.cardContainer}>
+          {notes.map((note) => (
+            <Note key={note._id} note={note} />
+          ))}
+        </div>
+        <AddNote />
+        <Toaster />
+      </main>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
