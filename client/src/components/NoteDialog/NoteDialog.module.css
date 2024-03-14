@@ -1,0 +1,10 @@
+.noteDialogForm{
+    display: grid;
+    gap: 1rem
+}
+
+.noteDialogFormButton{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
