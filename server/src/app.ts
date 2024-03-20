@@ -13,10 +13,6 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send({ Message: "hi from app.ts" });
-});
-
 app.use(
   session({
     secret: env.SESSION_SECRET,

@@ -1,18 +1,18 @@
 import { RequestHandler } from "express";
-import UserModel from "../models/UserModel";
 import createHttpError from "http-errors";
+import UserModel from "../models/UserModel";
 import bcrypt from "bcrypt";
 
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
-  const authenticatedUserID = req.session.userId;
+  const authenticatedUser = req.session.userId;
   try {
-    if (!authenticatedUserID) {
+    if (!authenticatedUser) {
       throw createHttpError(401, "User not authenticated");
     }
-    const user = await UserModel.findById(authenticatedUserID)
+    const user = await UserModel.findById(authenticatedUser)
       .select("+email")
       .exec();
-    res.status(201).json(user);
+    res.status(200).json(user);
   } catch (error) {
     next(error);
   }
@@ -24,7 +24,7 @@ interface SignUpBody {
   password?: string;
 }
 
-export const signup: RequestHandler<
+export const signUp: RequestHandler<
   unknown,
   unknown,
   SignUpBody,
@@ -37,22 +37,22 @@ export const signup: RequestHandler<
     if (!username || !email || !passwordRaw) {
       throw createHttpError(400, "Parameters missing");
     }
-    const existing = await UserModel.findOne({
+    const existingUsername = await UserModel.find({
       username: username,
     }).exec();
-    if (existing) {
+    if (existingUsername.length != 0) {
       throw createHttpError(
         409,
-        "Username already taken. Please choose a different one or login instead."
+        "Username already taken. Please choose a different one or log in instead"
       );
     }
-    const existingEmail = await UserModel.findOne({
+    const existingEmail = await UserModel.find({
       email: email,
     }).exec();
-    if (existingEmail) {
+    if (existingEmail.length != 0) {
       throw createHttpError(
         409,
-        "A user with this email already exists. Please login instead."
+        "Account with this email already exists. Please sign in."
       );
     }
     const passwordHashed = await bcrypt.hash(passwordRaw, 10);
@@ -84,24 +84,32 @@ export const login: RequestHandler<
   const username = req.body.username;
   const password = req.body.password;
   try {
-    if (!password || !username) {
-      throw createHttpError(400, "username or password missing");
+    if (!username || !password) {
+      throw createHttpError(400, "Parameters missing");
     }
-    const user = await UserModel.findOne({
-      username: username,
-    })
+    const user = await UserModel.findOne({ username: username })
       .select("+password +email")
       .exec();
     if (!user) {
-      throw createHttpError(401, "Invalid credentials");
+      throw createHttpError(401, "Invalid Credentials");
     }
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      throw createHttpError(401, "Invalid credentials");
+      throw createHttpError(401, "Invalid Credentials");
     }
     req.session.userId = user._id;
     res.status(201).json(user);
   } catch (error) {
     next(error);
   }
+};
+
+export const logout: RequestHandler = async (req, res, next) => {
+  req.session.destroy((error) => {
+    if (error) {
+      next(error);
+    } else {
+      res.send(200);
+    }
+  });
 };
