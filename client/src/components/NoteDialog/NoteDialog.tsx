@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -10,22 +11,23 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import * as NotesApi from "../../networks/NotesApi";
-import { useRef } from "react";
 import { useToast } from "../ui/use-toast";
 import noteDialogStyles from "./NoteDialog.module.css";
 
-interface NoteDialogIDProp {
-  textProp?: string;
+interface NoteDialogProps {
   id: string;
+  textProp?: string;
+  onDelete: () => void;
 }
 
-function NoteDialog({ id, textProp }: NoteDialogIDProp) {
+function NoteDialog({ id, textProp, onDelete }: NoteDialogProps) {
   const { toast } = useToast();
   const titleRef = useRef<HTMLInputElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+
   const handleEditEvent = async () => {
     const title = titleRef.current?.value || "";
-    if (title == "") {
+    if (title === "") {
       toast({
         title: "Title required in order to edit this note",
         description: "Title not found",
@@ -42,9 +44,7 @@ function NoteDialog({ id, textProp }: NoteDialogIDProp) {
       console.log(response);
     }
   };
-  const handleDeleteEvent = () => {
-    NotesApi.deleteNote(id);
-  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -77,7 +77,7 @@ function NoteDialog({ id, textProp }: NoteDialogIDProp) {
               variant={"destructive"}
               onClick={(e) => {
                 e.preventDefault();
-                handleDeleteEvent();
+                onDelete();
               }}
             >
               Delete

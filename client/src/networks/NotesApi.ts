@@ -61,9 +61,8 @@ export const editNote = async (editNoteBody: EditNoteBody) => {
   return editedNote.json();
 };
 
-export const deleteNote = async (id: string): Promise<NoteModel> => {
-  const deletedNote = await queryApi(`/notes/${id}`, {
+export const deleteNote = async (id: string) => {
+  await queryApi(`/notes/${id}`, {
     method: "DELETE",
   });
-  return deletedNote.json();
 };

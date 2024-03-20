@@ -10,17 +10,23 @@ import {
 import { formatDate } from "@/utils/FormatDate";
 import noteStyles from "./NoteCard.module.css";
 
-interface NoteCardProp {
+interface NoteCardProps {
   note: NoteModel;
+  onDelete: (noteId: string) => void;
 }
 
-function NoteCard({ note }: NoteCardProp) {
+function NoteCard({ note, onDelete }: NoteCardProps) {
   let noteDate: string;
   if (note.updatedAt > note.createdAt) {
     noteDate = "Updated At: " + formatDate(note.updatedAt);
   } else {
     noteDate = "Created At: " + formatDate(note.createdAt);
   }
+
+  const handleDelete = () => {
+    onDelete(note._id);
+  };
+
   return (
     <Card className={noteStyles.noteContainer}>
       <CardHeader>
@@ -28,8 +34,14 @@ function NoteCard({ note }: NoteCardProp) {
       </CardHeader>
       <CardContent>{note.text}</CardContent>
       <CardFooter className={noteStyles.noteFooter}>
-        <p>{noteDate}</p>
-        <NoteDialog id={note._id} textProp={note.text} />
+        <div className={noteStyles.noteFooter}>
+          <p>{noteDate}</p>
+          <NoteDialog
+            id={note._id}
+            textProp={note.text}
+            onDelete={handleDelete}
+          />
+        </div>
       </CardFooter>
     </Card>
   );

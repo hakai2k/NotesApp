@@ -16,8 +16,15 @@
 
 .navLists {
     display: flex;
+    visibility: hidden;
 }
 
 .navLists li {
     margin: 0 2rem;
+}
+
+@media (min-width: 760px){
+    .navLists{
+        visibility: visible;
+    }
 }

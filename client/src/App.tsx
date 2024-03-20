@@ -9,24 +9,61 @@ import { Toaster } from "./components/ui/toaster";
 
 function App() {
   const [notes, setNotes] = useState<NoteModel[]>([]);
+  const [noteLoading, setNotesLoading] = useState(true);
+  const [showNotesLoadingError, setshowNotesLoadingError] = useState(false);
   useEffect(() => {
     const getNotes = async () => {
-      const response = await NotesApi.getAllNotes();
-      setNotes(response);
+      try {
+        setshowNotesLoadingError(false);
+        setNotesLoading(true);
+        const response = await NotesApi.getAllNotes();
+        setNotes(response);
+      } catch (error) {
+        console.error(error);
+        alert(error);
+        setshowNotesLoadingError(true);
+        setNotesLoading(false);
+      } finally {
+        setNotesLoading(false);
+      }
     };
     getNotes();
   }, []);
+
+  const addNewNote = async (newNote: NoteModel) => {
+    setNotes([...notes, newNote]);
+  };
+
+  const deleteNote = async (noteId: string) => {
+    await NotesApi.deleteNote(noteId);
+    setNotes(notes.filter((note) => note._id !== noteId));
+  };
+
+  const notesCardContainer = (
+    <div className={styles.noteCardContainer}>
+      {notes.map((note) => (
+        <NoteCard note={note} key={note._id} onDelete={deleteNote} />
+      ))}
+    </div>
+  );
+
   return (
     <>
       <Navbar />
       <main className={styles.notesContainer}>
-        <div className={styles.noteCardContainer}>
-          {notes.map((note) => (
-            <NoteCard note={note} key={note._id} />
-          ))}
-        </div>
+        {noteLoading && "loading"}
+        {showNotesLoadingError && <p>Something went wrong!</p>}
+        {!noteLoading && !showNotesLoadingError && (
+          <>
+            {notes.length > 0 ? (
+              notesCardContainer
+            ) : (
+              <p>You dont have any notes</p>
+            )}
+          </>
+        )}
         <div className={styles.addNoteContainer}>
-          <AddNoteForm />
+          <AddNoteForm addNewNote={addNewNote} />
         </div>
       </main>
       <Toaster />

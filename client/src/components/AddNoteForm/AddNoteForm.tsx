@@ -6,8 +6,13 @@ import { Textarea } from "../ui/textarea";
 import { useToast } from "../ui/use-toast";
 import * as NotesApi from "../../networks/NotesApi";
 import formStyle from "./AddNoteForm.module.css";
+import { NoteModel } from "@/models/NoteModel";
 
-function AddNoteForm() {
+interface AddNoteFormProps {
+  addNewNote: (newNote: NoteModel) => void;
+}
+
+function AddNoteForm({ addNewNote }: AddNoteFormProps) {
   const { toast } = useToast();
   const titleRef = useRef<HTMLInputElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
@@ -25,8 +30,10 @@ function AddNoteForm() {
         title: title,
         text: text,
       };
+      if (titleRef.current) titleRef.current.value = "";
+      if (textRef.current) textRef.current.value = "";
       const response = await NotesApi.createNote(data);
-      console.log(response);
+      addNewNote(response);
     }
   };
   return (
